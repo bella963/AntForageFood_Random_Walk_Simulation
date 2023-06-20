@@ -105,7 +105,8 @@ simu_timeQ2 <- apply(outcomes_Q2, 2, function(v){which(abs(v) == 20)[1]})
 
 mean(simu_timeQ2) # the average time (seconds) an ant spent to forage food outside 20cm away from ant hill
 
-# The average time for foraging the food is "NA", which means non converging. Thus, the ant cannot reach food by moving to the exact location
+# The average time for foraging the food is "NA", which means non converging. 
+# Thus, the ant cannot reach food by moving to the exact location
 ```
 
 
@@ -152,9 +153,10 @@ Walk_Q3 <- function(t3){
 t3 = 100
 outcomes_Q3 <- replicate(n = 1000, Walk_Q3(t3))
 
-#the first occurrence at 20cm or -20cm means the ant successfully foraged the food
 
-simu_timeQ3 <- apply(outcomes_Q3, 2, function(v){which(v == FALSE)[1]}) # the first occurence of FALSE means the ant moved out of the boundary and successfully forage food
+# the first occurrence of FALSE means the ant moved out of the boundary and successfully forage food
+simu_timeQ3 <- apply(outcomes_Q3, 2, function(v){which(v == FALSE)[1]}) 
+
 
 mean(simu_timeQ3)
 sd(simu_timeQ3)
