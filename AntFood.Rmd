@@ -1,0 +1,164 @@
+---
+title: "An Ant looking for food"
+author: "Bella Shao"
+date: "2023-06-19"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(ggplot2)
+library(data.table)
+library(tinytex)
+
+set.seed(222)
+```
+
+## Introduction
+An ant leaves its ant hill to look for food. The ant walks at speed of $10cm$ per $1$ second and it moves randomly towards north, south, east and weat with equal probability.
+
+
+### Question 1
+The food is located $20cm$ away from the ant hill. In this case, the ant walks towards one of the four directions randomly at each step, and it starts exactly $20cm$ away from the food. This process is a random walk with $|10| cm$ per second. Each step randomly moves to one of the four directions with equal probability.
+
+
+```{r}
+Walk_Q1 <- function(t){ # t is the second/step
+  
+  walks <- 0  #starts from 20cm outside the center
+  #walks <- runif(n = 1, min = 0.01, max = 10.01) #start on the line of (10cm,0cm) and (0cm,10cm)
+  
+  for (s in 1:t){
+    
+  walks <- c(walks, walks[length(walks)] + sample(c(10,-10, 10,-10), size = 1, replace = TRUE))
+    
+}
+  
+return(walks)  
+  
+  
+}
+```
+
+
+
+```{r}
+# run this process many times
+t = 100
+outcomes_Q1 <- replicate(n = 500, Walk_Q1(t))
+
+#the first occurrence at 20cm or -20cm means the ant successfully foraged the food
+
+simu_timeQ1 <- apply(outcomes_Q1, 2, function(v){which(abs(v) == 20)[1]})
+
+mean(simu_timeQ1) # the average time (seconds) an ant spent to forage food outside 20cm away from ant hill
+sd(simu_timeQ1)
+```
+
+
+```{r}
+dt1 <- data.table(t = 1:(t+1),
+                  outcomes_Q1)
+
+
+dt1 <- melt(dt1, id.vars = "t")
+
+
+ggplot(dt1, aes(x = t, y = value, col = variable)) +
+  geom_line(alpha = 0.6) +
+  theme_bw() + theme(legend.position = "none") +
+  geom_hline(yintercept = 20, linetype = "dashed")
+```
+
+### Question 2
+
+The food is still at the same location, but the ant can only start moving at the coordinates of $(10cm,0)$ and $(0,10cm)$. In this case, the starting point for an ant is uniformly distributed within the range of $0$ and $10$.
+
+```{r}
+Walk_Q2 <- function(t2){ # t is the second/step
+  
+  
+  walks <- runif(n = 1, min = 0, max = 10) #start on the line of (10cm,0cm) and (0cm,10cm)
+  
+  for (s in 1:t2){
+    
+  walks <- c(walks, walks[length(walks)] + sample(c(10,-10, 10,-10), size = 1, replace = TRUE))
+    
+}
+  
+return(walks)  
+  
+  
+}
+```
+
+
+```{r}
+# run this process many times
+t2 = 100
+outcomes_Q2 <- replicate(n = 500, Walk_Q2(t2))
+
+#the first occurrence at 20cm or -20cm means the ant successfully foraged the food
+
+simu_timeQ2 <- apply(outcomes_Q2, 2, function(v){which(abs(v) == 20)[1]})
+
+mean(simu_timeQ2) # the average time (seconds) an ant spent to forage food outside 20cm away from ant hill
+
+# The average time for foraging the food is "NA", which means non converging. Thus, the ant cannot reach food by moving to the exact location
+```
+
+
+```{r}
+dt2 <- data.table(t = 1:(t2 + 1), outcomes_Q2)
+
+dt2 <- melt(dt2, id.vars = "t")
+
+
+ggplot(dt2, aes(x = t, y = value, col = variable)) +
+  geom_line(alpha = 0.6) +
+  theme_bw() + theme(legend.position = "none") +
+  geom_hline(yintercept = 20, linetype = "dashed")
+```
+
+
+### Question 3
+
+The ant hill is located at $x = 0cm$, $y = 0cm$, and the food is located at a closed  boundary $(\frac{x-2.5cm}{30cm})^2 + (\frac{y-2.5cm}{40})^2 < 1$.
+```{r}
+Walk_Q3 <- function(t3){
+  
+  x_cor <- 0
+  y_cor <- 0
+  
+  for (i in 1:t3)
+  {
+    #if walk along x coordinate
+    x_cor <- c(x_cor, x_cor[length(x_cor)] + sample(c(10,-10), size = 1, replace = TRUE)) 
+    
+    #if walk alone y coordinate
+    y_cor <- c(y_cor, y_cor[length(y_cor)] + sample(c(10,-10), size = 1, replace = TRUE))
+  }
+  
+  
+  boundary = ((x_cor - 2.5)/30)^2 + ((y_cor - 2.5)/40)^2 < 1
+  
+  return(boundary)
+}
+```
+
+```{r}
+# run this process many times
+t3 = 100
+outcomes_Q3 <- replicate(n = 1000, Walk_Q3(t3))
+
+#the first occurrence at 20cm or -20cm means the ant successfully foraged the food
+
+simu_timeQ3 <- apply(outcomes_Q3, 2, function(v){which(v == FALSE)[1]}) # the first occurence of FALSE means the ant moved out of the boundary and successfully forage food
+
+mean(simu_timeQ3)
+sd(simu_timeQ3)
+```
+
+
+
